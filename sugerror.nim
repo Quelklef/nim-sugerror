@@ -1,6 +1,9 @@
 import options
 
-template toOption*[T, X](expr: T; ex: typedesc[X]): Option[T] =
+when isMainModule:
+  import strutils
+
+template toOption*[T](expr: T; ex: untyped): Option[T] =
   ## Maps an exception to an Option.
   ## If the expression raises the given exception, returns ``none(T)``.
   ## Else, returns ``some(expr)``.
@@ -10,13 +13,23 @@ template toOption*[T, X](expr: T; ex: typedesc[X]): Option[T] =
   ## ..code-block:: nim
   ##   "3".parseInt.toOption(ValueError) == some(3)
   ##   "three".parseInt.toOption(ValueError) == none(int)
+
+  # I would much prefer the following be
+  # var res: Option[T]
+  # try: res = some(expr)
+  # except ex: res = none(T)
+  # But that doesn't work for some reason
   block:
-    var res: Option[T]
+    var res = none[T]()
     try:
       res = some(expr)
     except ex:
-      res = none(T)
+      discard
     res
+
+when isMainModule:
+  assert("3".parseInt.toOption(ValueError) == some(3))
+  assert("t".parseInt.toOption(ValueError) == none(int))
 
 template toOption*[T](expr: T): Option[T] =
   ## Maps an exception to an Option.
@@ -29,12 +42,16 @@ template toOption*[T](expr: T): Option[T] =
   ##   "3".parseInt.toOpion == some(3)
   ##   "three".parseInt.toOption == none(int)
   block:
-    var res: Option[T]
+    var res = none[T]()
     try:
       res = some(expr)
     except:
-      res = none(T)
+      discard
     res
+
+when isMainModule:
+  assert("3".parseInt.toOption == some(3))
+  assert("t".parseInt.toOption == none(int))
 
 template catch*[T, X](expr: T; ex: typedesc[X]; default: T): T =
   ## Maps an exception to a value.
@@ -54,6 +71,10 @@ template catch*[T, X](expr: T; ex: typedesc[X]; default: T): T =
       res = default
     res
 
+when isMainModule:
+  assert("3".parseInt.catch(ValueError, 0) == 3)
+  assert("t".parseInt.catch(ValueError, 0) == 0)
+
 template catch*[T](expr: T; default: T): T =
   ## Maps an exception to a value.
   ## If the expression raises a catchable exception, returns ``default``.
@@ -72,7 +93,11 @@ template catch*[T](expr: T; default: T): T =
       res = default
     res
 
-template reraise*[T, XF, XT: Exception](expr: T; exFrom: typedesc[XF]; exTo: XT): T =
+when isMainModule:
+  assert("3".parseInt.catch(0) == 3)
+  assert("t".parseInt.catch(0) == 0)
+
+template reraise*[T](expr: T; exFrom, exTo: untyped): T =
   ## Maps an exception to an exception.
   ## If the expression raises an exception of the type ``exFrom``, raises ``exTo``.
   ## Else, returns ``expr``.
@@ -90,3 +115,11 @@ template reraise*[T, XF, XT: Exception](expr: T; exFrom: typedesc[XF]; exTo: XT)
       res = expr
     except exFrom:
       raise exTo
+    res
+
+when isMainModule:
+  try:
+    let x = "t".parseInt.reraise(ValueError, OSError.newException(""))
+    assert(false)
+  except OSError:
+    discard
