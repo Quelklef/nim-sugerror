@@ -9,8 +9,6 @@ Templates for terse and composable error handling in Nim.
 Suppose you have some string `input` that you get from the user. You want to parse it into an integer,
 with a default value `0`. With sugerror, this can be done in any of the following manners:
 
-#### The vanilla way:
-
 ```nim
 var x: int
 try:
@@ -19,15 +17,11 @@ except ValueError:
   x = 0
 ```
 
-#### `sugerror.catch`:
-
-`catch` returns a given default value if the given exception is raised.
+`sugerror.catch` returns a given default value if the given exception is raised.
 
 ```nim
 let x = parseInt(input).catch(ValueError, 0)
 ```
-
-#### `sugerror.catch` (2):
 
 If `catch` is not given an exception, it catches all catchable exceptions.
 
@@ -40,8 +34,6 @@ let x = parseInt(input).catch(0)
 Suppose you don't want to have a default value `0` but instead would like to make `x` be an `Option[int]`
 depending on whether `input` is a valid integer or not.
 
-#### The vanilla way:
-
 ```nim
 var x: Option[int]
 try:
@@ -50,15 +42,11 @@ except ValueError:
   x = none(int)
 ```
 
-#### `sugerror.toOption`
-
-`toOption` boxes the expression in an `Option` based on whether or not the given exception was raised.
+`sugerror.toOption` boxes the expression in an `Option` based on whether or not the given exception was raised.
 
 ```nim
 let x = parseInt(input).toOption(ValueError)
 ```
-
-#### `sugerror.toOption` (2):
 
 If `toOption` is not given an exception, it catches all catchable exceptions.
 
@@ -70,9 +58,7 @@ let x = parseInt(input).toOption
 
 Sometimes you want to let an exception propogate, but change what the exception is. For instance, say
 you want to catch a `KeyError` and reraise a `ValueError` with some custom text. The following
-examples use `table: Table[string, int]` and `key: string`
-
-#### The vanilla way:
+examples use `table: Table[string, int]` and `key: string`:
 
 ```nim
 var val: int
@@ -82,13 +68,11 @@ except KeyError:
   raise ValueError.newException("Hey, buddy, that key doesn't exist!")
 ```
 
-#### `sugerror.reraise`:
+This can also be done with `sugerror.reraise`:
 
 ```nim
 let val = table[key].reraise(KeyError, ValueError.newException("Hey, buddy, that key doesn't exist!"))
 ```
-
-#### `sugerror.reraise` (2):
 
 If `reraise` is supplied a type instead of an error, the error type will be instantiated with the current
 exception msg.
