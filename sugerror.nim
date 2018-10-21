@@ -3,7 +3,7 @@ import options
 when isMainModule:
   import strutils
 
-template toOption*[T](expr: T; ex: untyped): Option[T] =
+template toOption*[T; X](expr: T; ex: typedesc[X]): Option[T] =
   ## Maps an exception to an Option.
   ## If the expression raises the given exception, returns ``none(T)``.
   ## Else, returns ``some(expr)``.
