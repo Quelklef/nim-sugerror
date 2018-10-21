@@ -85,5 +85,16 @@ except KeyError:
 #### `sugerror.reraise`:
 
 ```nim
-let val = table[key].reraise(KeyError, ValueError.newException("Key, buddy, that key doesn't exist!"))
+let val = table[key].reraise(KeyError, ValueError.newException("Hey, buddy, that key doesn't exist!"))
+```
+
+#### `sugerror.reraise` (2):
+
+If `reraise` is supplied a type instead of an error, the error type will be instantiated with the current
+exception msg.
+
+```nim
+let val = table[key].reraise(KeyError, ValueError)
+# is equivalent to
+let val = table[key].reriase(KeyError, ValueError.newException(getCurrentExceptionMsg()))
 ```

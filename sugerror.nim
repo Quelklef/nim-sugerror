@@ -97,7 +97,7 @@ when isMainModule:
   assert("3".parseInt.catch(0) == 3)
   assert("t".parseInt.catch(0) == 0)
 
-template reraise*[T](expr: T; exFrom, exTo: untyped): T =
+template reraise*[T; XF, XT](expr: T; exFrom: typedesc[XF]; exTo: XT): T =
   ## Maps an exception to an exception.
   ## If the expression raises an exception of the type ``exFrom``, raises ``exTo``.
   ## Else, returns ``expr``.
@@ -117,9 +117,18 @@ template reraise*[T](expr: T; exFrom, exTo: untyped): T =
       raise exTo
     res
 
+template reraise*[T; XF, XT](expr: T; exFrom: typedesc[XF]; exTo: typedesc[XT]): T =
+  ## Equivalent to ``expr.reraise(exFrom, exTo.newException(getCurrentExceptionMsg()))``
+  expr.reraise(exFrom, exTo.newException(getCurrentExceptionMsg()))
+
 when isMainModule:
   try:
     let x = "t".parseInt.reraise(ValueError, OSError.newException(""))
     assert(false)
   except OSError:
-    discard
+    assert(getCurrentExceptionMsg() == "")
+
+  try:
+    let x = "t".parseInt.reraise(ValueError, OSError)
+  except OSError:
+    assert(getCurrentExceptionMsg() == "invalid integer: t")
