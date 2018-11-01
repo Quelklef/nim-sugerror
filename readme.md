@@ -57,28 +57,28 @@ let x = parseInt(input).toOption
 ## Exceptions to Exceptions
 
 Sometimes you want to let an exception propogate, but change what the exception is. For instance, say
-you want to catch a `KeyError` and reraise a `ValueError` with some custom text. The following
-examples use `table: Table[string, int]` and `key: string`:
+you want to catch a `KeyError` and raise a custom `TableError`. The following examples use
+`TableError: ref Exception`, `table: Table[string, int]`, and `key: string`:
 
 ```nim
 var val: int
 try:
   val = table[key]
 except KeyError:
-  raise ValueError.newException("Hey, buddy, that key doesn't exist!")
+  raise TableError.newException("Hey, buddy, that key doesn't exist!")
 ```
 
 This can also be done with `sugerror.reraise`:
 
 ```nim
-let val = table[key].reraise(KeyError, ValueError.newException("Hey, buddy, that key doesn't exist!"))
+let val = table[key].reraise(KeyError, TableError.newException("Hey, buddy, that key doesn't exist!"))
 ```
 
 If `reraise` is supplied a type instead of an error, the error type will be instantiated with the current
 exception msg.
 
 ```nim
-let val = table[key].reraise(KeyError, ValueError)
+let val = table[key].reraise(KeyError, TableError)
 # is equivalent to
-let val = table[key].reriase(KeyError, ValueError.newException(getCurrentExceptionMsg()))
+let val = table[key].reriase(KeyError, TableError.newException(getCurrentExceptionMsg()))
 ```
