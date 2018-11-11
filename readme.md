@@ -82,3 +82,11 @@ let val = table[key].reraise(KeyError, ValueError)
 # is equivalent to
 let val = table[key].reriase(KeyError, ValueError.newException(getCurrentExceptionMsg()))
 ```
+
+`reraise` can also be used with statements instead of expressions:
+
+```nim
+var val: int
+reraise(KeyError, ValueError):
+  val = table[key]
+```

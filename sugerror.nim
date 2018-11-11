@@ -121,6 +121,29 @@ template reraise*[T; XF, XT](expr: T; exFrom: typedesc[XF]; exTo: typedesc[XT]):
   ## Equivalent to ``expr.reraise(exFrom, exTo.newException(getCurrentExceptionMsg()))``
   expr.reraise(exFrom, exTo.newException(getCurrentExceptionMsg()))
 
+template reraise*[XF, XT](exFrom: typedesc[XF]; exTo: XT, blc: untyped) =
+  ## Maps an exception to an exception.
+  ## Works on statement blocks rather than expressions.
+  ## If the block raises an exception of the type ``exFrom``, raises ``exTo``.
+  ##
+  ## For example:
+  ##
+  ## ..code-block:: nim
+  ##   reraise(UnpackError, ValueError.newException("Need an int!")):
+  ##      some(108).get()  # fine
+  ##      none(int).get()  # raises ValueError
+  try:
+    blc
+  except exFrom:
+    raise exTo
+
+template reraise*[XF, XT](exFrom: typedesc[XF]; exTo: typedesc[XT]; blc: untyped) =
+  ## Equivalent to ``reraise(exFrom, exTo.newException(getCurrentExceptionMsg())): blc``
+  try:
+    blc
+  except exFrom:
+    raise exTo.newException(getCurrentExceptionMsg())
+
 when isMainModule:
   try:
     let x = "t".parseInt.reraise(ValueError, OSError.newException(""))
@@ -130,5 +153,20 @@ when isMainModule:
 
   try:
     let x = "t".parseInt.reraise(ValueError, OSError)
+    assert(false)
+  except OSError:
+    assert(getCurrentExceptionMsg() == "invalid integer: t")
+
+  try:
+    reraise(ValueError, OSError.newException("")):
+      let x = "t".parseInt
+    assert(false)
+  except OSError:
+    assert(getCurrentExceptionMsg() == "")
+
+  try:
+    reraise(ValueError, OSError):
+      let x = "t".parseInt
+    assert(false)
   except OSError:
     assert(getCurrentExceptionMsg() == "invalid integer: t")
