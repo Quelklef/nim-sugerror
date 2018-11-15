@@ -2,6 +2,23 @@
 
 Templates for terse and composable error handling in Nim.
 
+# Installation
+
+Sugerror is on nimble. Run:
+
+```bash
+nimble update
+nimble install sugerror
+```
+
+then just
+
+```nim
+import sugerror
+```
+
+in your Nim code.
+
 # Explanatory examples
 
 ## Exceptions to Default Values
